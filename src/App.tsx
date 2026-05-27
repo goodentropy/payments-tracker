@@ -53,7 +53,7 @@ function App() {
     setLoadingSessions(true);
     try {
       const { data, error } = await supabase
-        .from('sessions')
+        .from('edtech_sessions')
         .select('*')
         .eq('user_id', user?.id)
         .order('date', { ascending: false });
@@ -78,7 +78,7 @@ function App() {
     
     try {
       const { data, error } = await supabase
-        .from('sessions')
+        .from('edtech_sessions')
         .insert([
           { 
             date: sessionData.date,
@@ -111,7 +111,7 @@ function App() {
     
     try {
       const { error } = await supabase
-        .from('sessions')
+        .from('edtech_sessions')
         .update({ status: newStatus, paid_at: paidAt })
         .eq('id', id);
         

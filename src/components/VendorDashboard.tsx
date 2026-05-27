@@ -13,7 +13,7 @@ export default function VendorDashboard() {
   const fetchAllSessions = async () => {
     try {
       const { data, error } = await supabase
-        .from('sessions')
+        .from('edtech_sessions')
         .select('*')
         .order('date', { ascending: false });
         
@@ -31,7 +31,7 @@ export default function VendorDashboard() {
     
     try {
       const { error } = await supabase
-        .from('sessions')
+        .from('edtech_sessions')
         .update({ status: newStatus })
         .eq('id', id);
         
