@@ -1,19 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --bg-color: #0b0f19;
-  --card-bg: rgba(17, 24, 39, 0.65);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --accent-color: #6366f1; /* Indigo vibrant */
-  --accent-hover: #4f46e5;
-  --accent-glow: rgba(99, 102, 241, 0.4);
-  --success-color: #10b981;
-  --success-bg: rgba(16, 185, 129, 0.15);
-  --pending-color: #f59e0b;
-  --pending-bg: rgba(245, 158, 11, 0.15);
-  --input-bg: rgba(15, 23, 42, 0.8);
+  /* Minimalist High Contrast Dark Theme */
+  --bg-color: #09090b;
+  --bento-bg: #18181b;
+  --bento-border: #27272a;
+  
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  
+  --accent-color: #f4f4f5;
+  --accent-text: #09090b;
+  --accent-hover: #e4e4e7;
+  
+  --success-color: #4ade80;
+  --success-bg: rgba(74, 222, 128, 0.1);
+  
+  --pending-color: #facc15;
+  --pending-bg: rgba(250, 204, 21, 0.1);
+  
+  --input-bg: #09090b;
+  --input-border: #3f3f46;
 }
 
 * {
@@ -25,132 +32,129 @@
 body {
   font-family: 'Inter', sans-serif;
   background-color: var(--bg-color);
-  background-image: 
-    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.08), transparent 25%);
   color: var(--text-primary);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  -webkit-font-smoothing: antialiased;
 }
 
 .app-container {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 24px;
+  padding: 48px 24px;
   width: 100%;
 }
 
 .header {
-  margin-bottom: 40px;
-  text-align: center;
+  margin-bottom: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
 }
 
 .header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #a5b4fc, #c084fc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 8px;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
 }
 
 .header p {
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
-.glass-panel {
-  background: var(--card-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--card-border);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.glass-panel:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
-}
-
-/* Layout Utilities */
-.grid-2 {
+/* Bento Box Layout */
+.bento-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(12, 1fr);
   gap: 24px;
-  margin-bottom: 32px;
 }
 
-.flex-between {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.bento-card {
+  background: var(--bento-bg);
+  border: 1px solid var(--bento-border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.col-span-12 { grid-column: span 12; }
+.col-span-8 { grid-column: span 8; }
+.col-span-4 { grid-column: span 4; }
+.col-span-6 { grid-column: span 6; }
+
+@media (max-width: 900px) {
+  .col-span-8, .col-span-4, .col-span-6 {
+    grid-column: span 12;
+  }
+}
+
+.bento-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 /* Buttons */
 .btn {
   background: var(--accent-color);
-  color: #fff;
+  color: var(--accent-text);
   border: none;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 1rem;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px var(--accent-glow);
+  transition: background 0.15s ease;
   font-family: 'Inter', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn:hover {
   background: var(--accent-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px var(--accent-glow);
-}
-
-.btn:active {
-  transform: translateY(1px);
 }
 
 /* Inputs */
 .input-group {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
 }
 
 .input-group label {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
 }
 
 .input-control {
   background: var(--input-bg);
-  border: 1px solid var(--card-border);
-  padding: 12px 16px;
-  border-radius: 12px;
+  border: 1px solid var(--input-border);
+  padding: 10px 14px;
+  border-radius: 8px;
   color: var(--text-primary);
   font-family: 'Inter', sans-serif;
-  font-size: 1rem;
-  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  transition: border-color 0.15s ease;
 }
 
 .input-control:focus {
   outline: none;
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
 /* Badges */
 .badge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 .badge.success {
@@ -163,12 +167,62 @@ body {
   color: var(--pending-color);
 }
 
+/* Calendar Styles */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.calendar-header-day {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  background: var(--bg-color);
+  border: 1px solid var(--bento-border);
+  position: relative;
+}
+
+.calendar-day.empty {
+  background: transparent;
+  border: none;
+}
+
+.calendar-day.active {
+  background: rgba(250, 250, 250, 0.05);
+  border-color: var(--input-border);
+}
+
+.calendar-day.has-session {
+  border-color: var(--accent-color);
+}
+
+.calendar-day .indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  margin-top: 4px;
+}
+
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.4s ease forwards;
 }

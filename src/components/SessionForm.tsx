@@ -3,10 +3,11 @@ import type { FormEvent } from 'react';
 import type { Session } from '../App';
 
 type Props = {
-  onAddSession: (session: Omit<Session, 'id' | 'amount' | 'status'>) => void;
+  onAddSession: (session: Omit<Session, 'id' | 'amount' | 'status' | 'created_at'>) => void;
+  isAdding: boolean;
 };
 
-export default function SessionForm({ onAddSession }: Props) {
+export default function SessionForm({ onAddSession, isAdding }: Props) {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [type, setType] = useState<'Focus Group' | '1-on-1'>('Focus Group');
   const [hours, setHours] = useState(1);
@@ -14,14 +15,13 @@ export default function SessionForm({ onAddSession }: Props) {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onAddSession({ date, type, hours });
-    // Reset form to defaults
     setHours(1);
     setType('Focus Group');
   };
 
   return (
-    <div className="glass-panel">
-      <h3 style={{ marginBottom: '20px', fontSize: '1.2rem' }}>Log Session</h3>
+    <div className="bento-card col-span-4">
+      <div className="bento-title">Log Session</div>
       <form onSubmit={handleSubmit}>
         <div className="input-group">
           <label htmlFor="date">Date</label>
@@ -49,7 +49,7 @@ export default function SessionForm({ onAddSession }: Props) {
         </div>
 
         <div className="input-group">
-          <label htmlFor="hours">Hours ($50/hr)</label>
+          <label htmlFor="hours">Hours ($50/hr rate)</label>
           <input 
             type="number" 
             id="hours" 
@@ -62,8 +62,8 @@ export default function SessionForm({ onAddSession }: Props) {
           />
         </div>
 
-        <button type="submit" className="btn" style={{ width: '100%', marginTop: '10px' }}>
-          Add Session
+        <button type="submit" className="btn" style={{ width: '100%', marginTop: '8px' }} disabled={isAdding}>
+          {isAdding ? 'Adding...' : 'Add Session'}
         </button>
       </form>
     </div>
