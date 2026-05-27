@@ -11,12 +11,14 @@ import { supabase } from './lib/supabase';
 export type Session = {
   id: string;
   date: string;
+  start_time?: string | null;
   type: 'Focus Group' | '1-on-1';
   hours: number;
   amount: number;
   status: 'Pending' | 'Paid';
   created_at?: string;
   user_id?: string;
+  paid_at?: string | null;
 };
 
 function App() {
@@ -28,13 +30,11 @@ function App() {
   const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
-    // Check active sessions and sets the user
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setRole(session?.user?.user_metadata?.role ?? 'teacher');
     });
 
-    // Listen for changes on auth state (sign in, sign out, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setRole(session?.user?.user_metadata?.role ?? 'teacher');
@@ -72,7 +72,7 @@ function App() {
     }
   };
 
-  const addSession = async (sessionData: Omit<Session, 'id' | 'amount' | 'status' | 'created_at' | 'user_id'>) => {
+  const addSession = async (sessionData: Omit<Session, 'id' | 'amount' | 'status' | 'created_at' | 'user_id' | 'paid_at'>) => {
     setIsAdding(true);
     const amount = sessionData.hours * 50; 
     
@@ -81,7 +81,8 @@ function App() {
         .from('sessions')
         .insert([
           { 
-            date: sessionData.date, 
+            date: sessionData.date,
+            start_time: sessionData.start_time,
             type: sessionData.type, 
             hours: sessionData.hours, 
             amount: amount,
@@ -106,11 +107,12 @@ function App() {
 
   const toggleStatus = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === 'Pending' ? 'Paid' : 'Pending';
+    const paidAt = newStatus === 'Paid' ? new Date().toISOString() : null;
     
     try {
       const { error } = await supabase
         .from('sessions')
-        .update({ status: newStatus })
+        .update({ status: newStatus, paid_at: paidAt })
         .eq('id', id);
         
       if (error) {
@@ -118,7 +120,7 @@ function App() {
         return;
       }
       
-      setSessions(sessions.map(s => s.id === id ? { ...s, status: newStatus as 'Pending' | 'Paid' } : s));
+      setSessions(sessions.map(s => s.id === id ? { ...s, status: newStatus as 'Pending' | 'Paid', paid_at: paidAt } : s));
     } catch (err) {
       console.error(err);
     }
@@ -152,7 +154,6 @@ function App() {
       ) : role === 'vendor' ? (
         <VendorDashboard />
       ) : (
-        // Teacher View
         loadingSessions ? (
           <div style={{ textAlign: 'center', marginTop: '100px', color: 'var(--text-secondary)' }}>
             Loading your sessions...
@@ -160,8 +161,8 @@ function App() {
         ) : (
           <div className="bento-grid">
             <Dashboard sessions={sessions} />
-            <SessionList sessions={sessions} onToggleStatus={toggleStatus} />
             <SessionForm onAddSession={addSession} isAdding={isAdding} />
+            <SessionList sessions={sessions} onToggleStatus={toggleStatus} />
             <Calendar sessions={sessions} />
           </div>
         )
