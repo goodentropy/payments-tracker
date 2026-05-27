@@ -9,7 +9,7 @@ If you are an educator participating in edtech focus groups and 1-on-1 feedback 
 ## 🚀 How to Get Started
 
 ### 1. Sign Up
-Go to our live website: [payments-tracker-one.vercel.app](https://payments-tracker-one.vercel.app)
+Go to our live website: [https://validtracker.vercel.app](httops://validtracker.vercel.app)
 - Click **Sign Up**.
 - Enter your email and a secure password.
 - Make sure you select **"I am a Teacher"** before you click the sign-up button.
