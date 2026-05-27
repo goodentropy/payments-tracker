@@ -1,122 +1,71 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import Dashboard from './components/Dashboard';
+import SessionForm from './components/SessionForm';
+import SessionList from './components/SessionList';
+
+export type Session = {
+  id: string;
+  date: string;
+  type: 'Focus Group' | '1-on-1';
+  hours: number;
+  amount: number;
+  status: 'Pending' | 'Paid';
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [sessions, setSessions] = useState<Session[]>([
+    {
+      id: '1',
+      date: '2026-05-20',
+      type: 'Focus Group',
+      hours: 1,
+      amount: 50,
+      status: 'Paid',
+    },
+    {
+      id: '2',
+      date: '2026-05-25',
+      type: '1-on-1',
+      hours: 1.5,
+      amount: 75,
+      status: 'Pending',
+    }
+  ]);
+
+  const addSession = (sessionData: Omit<Session, 'id' | 'amount' | 'status'>) => {
+    const newSession: Session = {
+      ...sessionData,
+      id: Math.random().toString(36).substr(2, 9),
+      amount: sessionData.hours * 50, // Core EdTech use case: $50/hr
+      status: 'Pending'
+    };
+    setSessions([newSession, ...sessions]);
+  };
+
+  const toggleStatus = (id: string) => {
+    setSessions(sessions.map(s => {
+      if (s.id === id) {
+        return { ...s, status: s.status === 'Pending' ? 'Paid' : 'Pending' };
+      }
+      return s;
+    }));
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app-container animate-fade-in">
+      <header className="header">
+        <h1>TeachersValidate</h1>
+        <p>Earnings & Feedback Tracker</p>
+      </header>
 
-      <div className="ticks"></div>
+      <Dashboard sessions={sessions} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <div className="grid-2">
+        <SessionForm onAddSession={addSession} />
+        <SessionList sessions={sessions} onToggleStatus={toggleStatus} />
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;
