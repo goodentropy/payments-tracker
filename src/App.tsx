@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
+import type { User } from '@supabase/supabase-js';
 import Dashboard from './components/Dashboard';
 import SessionForm from './components/SessionForm';
 import SessionList from './components/SessionList';
 import Calendar from './components/Calendar';
+import Auth from './components/Auth';
+import VendorDashboard from './components/VendorDashboard';
 import { supabase } from './lib/supabase';
 
 export type Session = {
@@ -13,27 +16,50 @@ export type Session = {
   amount: number;
   status: 'Pending' | 'Paid';
   created_at?: string;
+  user_id?: string;
 };
 
 function App() {
+  const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState<'teacher' | 'vendor' | null>(null);
+  
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingSessions, setLoadingSessions] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
-    fetchSessions();
+    // Check active sessions and sets the user
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setRole(session?.user?.user_metadata?.role ?? 'teacher');
+    });
+
+    // Listen for changes on auth state (sign in, sign out, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setRole(session?.user?.user_metadata?.role ?? 'teacher');
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (user && role === 'teacher') {
+      fetchSessions();
+    }
+  }, [user, role]);
+
   const fetchSessions = async () => {
+    setLoadingSessions(true);
     try {
       const { data, error } = await supabase
         .from('sessions')
         .select('*')
+        .eq('user_id', user?.id)
         .order('date', { ascending: false });
         
       if (error) {
         console.error('Error fetching sessions:', error);
-        // Fallback to empty array if table doesn't exist yet
         return;
       }
       if (data) {
@@ -42,13 +68,13 @@ function App() {
     } catch (err) {
       console.error('Error:', err);
     } finally {
-      setLoading(false);
+      setLoadingSessions(false);
     }
   };
 
-  const addSession = async (sessionData: Omit<Session, 'id' | 'amount' | 'status' | 'created_at'>) => {
+  const addSession = async (sessionData: Omit<Session, 'id' | 'amount' | 'status' | 'created_at' | 'user_id'>) => {
     setIsAdding(true);
-    const amount = sessionData.hours * 50; // Core EdTech use case: $50/hr
+    const amount = sessionData.hours * 50; 
     
     try {
       const { data, error } = await supabase
@@ -59,7 +85,8 @@ function App() {
             type: sessionData.type, 
             hours: sessionData.hours, 
             amount: amount,
-            status: 'Pending'
+            status: 'Pending',
+            user_id: user?.id
           }
         ])
         .select();
@@ -97,26 +124,47 @@ function App() {
     }
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   return (
     <div className="app-container animate-fade-in">
-      <header className="header">
+      <header className="header" style={{ marginBottom: '32px' }}>
         <div>
           <h1>TeachersValidate</h1>
           <p>Earnings & Feedback Tracker</p>
         </div>
+        {user && (
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+              Logged in as {user.email} <span className="badge" style={{ background: '#3f3f46', marginLeft: '8px' }}>{role}</span>
+            </div>
+            <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid var(--bento-border)', color: 'var(--text-primary)', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}>
+              Log Out
+            </button>
+          </div>
+        )}
       </header>
 
-      {loading ? (
-        <div style={{ textAlign: 'center', marginTop: '100px', color: 'var(--text-secondary)' }}>
-          Loading sessions...
-        </div>
+      {!user ? (
+        <Auth />
+      ) : role === 'vendor' ? (
+        <VendorDashboard />
       ) : (
-        <div className="bento-grid">
-          <Dashboard sessions={sessions} />
-          <SessionList sessions={sessions} onToggleStatus={toggleStatus} />
-          <SessionForm onAddSession={addSession} isAdding={isAdding} />
-          <Calendar sessions={sessions} />
-        </div>
+        // Teacher View
+        loadingSessions ? (
+          <div style={{ textAlign: 'center', marginTop: '100px', color: 'var(--text-secondary)' }}>
+            Loading your sessions...
+          </div>
+        ) : (
+          <div className="bento-grid">
+            <Dashboard sessions={sessions} />
+            <SessionList sessions={sessions} onToggleStatus={toggleStatus} />
+            <SessionForm onAddSession={addSession} isAdding={isAdding} />
+            <Calendar sessions={sessions} />
+          </div>
+        )
       )}
     </div>
   );
